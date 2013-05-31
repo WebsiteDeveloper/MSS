@@ -27,10 +27,10 @@ public class Rechner {
     }
     
     public void berechnen(Vec2 coords1, Vec2 coords2, double m1) {
-        Vec2 a;
-        Vec2 v = new Vec2(0, 0.295);
-        Vec2 coords = coords2;
-        Vec2 r;
+        Vec2 a, a1, a2, a3;
+        Vec2 v = new Vec2(0, 0.295), v1, v2, v3;
+        Vec2 coords = coords2, temp_coords;
+        Vec2 r, r1, r2, r3;
 
         double delta_t = 0.1; //delta_t in Sekunden
         double t = 0; // t in Sekunden
@@ -45,6 +45,8 @@ public class Rechner {
             if(Rechner.debug) {
                 System.out.println("Vec2 r = (" + r.x + " , " + r.y + ")");
             }
+            
+            /* Runge Kutta Start */
             // Berechnung der Beschleunigung
             a = this.a(m1, r);
             results[counter][2] = a.x;
@@ -52,7 +54,24 @@ public class Rechner {
             if(Rechner.debug) {
                 System.out.println("Vec2 a = (" + a.x + " , " + a.y + ")");
             }
-            v = Vec2.add(v, Vec2.skalarMultiply(delta_t, a));
+            
+            v1 = Vec2.add(v, Vec2.skalarMultiply(delta_t/2, a));
+            temp_coords = Vec2.add(coords, Vec2.skalarMultiply(delta_t, v1));
+            r1 = Vec2.add(coords1, Vec2.negate(temp_coords));
+            a1 = this.a(m1, r1);
+            
+            v2 = Vec2.add(v, Vec2.skalarMultiply(delta_t/2, a1));
+            temp_coords = Vec2.add(coords, Vec2.skalarMultiply(delta_t, v2));
+            r2 = Vec2.add(coords1, Vec2.negate(temp_coords));
+            a2 = this.a(m1, r2);
+            
+            v3 = Vec2.add(v, Vec2.skalarMultiply(delta_t, a2));
+            temp_coords = Vec2.add(coords, Vec2.skalarMultiply(delta_t, v3));
+            r3 = Vec2.add(coords1, Vec2.negate(temp_coords));
+            a3 = this.a(m1, r3);
+            
+            v = Vec2.add(v, Vec2.skalarMultiply(delta_t * 1.0/6, Vec2.add(Vec2.add(a, Vec2.skalarMultiply(2, Vec2.add(a1, a2))), a3)));
+            /* Runge Kutta Ende */
             results[counter][4] = v.x;
             results[counter][5] = v.y;
             if(Rechner.debug) {
@@ -74,7 +93,7 @@ public class Rechner {
         }
         
         if(Rechner.writeToFile) {
-            this.writeDataToFile("data.txt", results);
+            this.writeDataToFile("test1.txt", results);
         }
 		}
 		
